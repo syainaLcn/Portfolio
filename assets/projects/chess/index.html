@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chess|Lucena</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f9f7f2; 
+            color: #5d5d5d;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* LAKIHANG TURN INDICATOR (SA ITAAS) */
+        #tog {
+            width: 90%;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 15px;
+            font-size: 1.8rem; /* Mas malaki na */
+            font-weight: bold;
+            border: 4px solid #f8a5c2;
+            color: #5d5d5d;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(248, 165, 194, 0.2);
+        }
+
+        ul {
+            padding: 0;
+            border: 10px solid #aab86d;
+            list-style: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background-color: #aab86d;
+        }
+
+        .divv {
+            display: flex;
+        }
+
+        .box {
+            width: 11.5vw; 
+            height: 11.5vw;
+            max-width: 60px;
+            max-height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0;
+            cursor: pointer;
+        }
+
+        .allimg {
+            width: 90%;
+            height: 90%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* SCOREBOARD SA IBABA */
+        .scoreboard {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px; /* Space sa ilalim ng board */
+        }
+
+        .score-box {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 2px solid #aab86d;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            min-width: 120px;
+            text-align: center;
+        }
+
+        #winner-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(249, 247, 242, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #winner-box {
+            background: white;
+            padding: 40px;
+            border-radius: 25px;
+            border: 5px solid #f8a5c2;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        #winner-text {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        #play-again-btn {
+            padding: 12px 30px;
+            background: #f8a5c2;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 400px) {
+            #tog { font-size: 1.4rem; padding: 10px; }
+            .score-box { font-size: 0.9rem; min-width: 100px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="game-container">
+        <h2 id="tog">White's Turn ♡</h2>
+
+        <ul id="board">
+            <div class="divv" id="row8">
+                <li class="box" id="b801">Brook</li><li class="box" id="b802">Bknight</li><li class="box" id="b803">Bbishop</li><li class="box" id="b804">Bqueen</li>
+                <li class="box" id="b805">Bking</li><li class="box" id="b806">Bbishop</li><li class="box" id="b807">Bknight</li><li class="box" id="b808">Brook</li>
+            </div>
+            <div class="divv" id="row7">
+                <li class="box" id="b701">Bpawn</li><li class="box" id="b702">Bpawn</li><li class="box" id="b703">Bpawn</li><li class="box" id="b704">Bpawn</li>
+                <li class="box" id="b705">Bpawn</li><li class="box" id="b706">Bpawn</li><li class="box" id="b707">Bpawn</li><li class="box" id="b708">Bpawn</li>
+            </div>
+            <div class="divv" id="row6"><li class="box" id="b601"></li><li class="box" id="b602"></li><li class="box" id="b603"></li><li class="box" id="b604"></li><li class="box" id="b605"></li><li class="box" id="b606"></li><li class="box" id="b607"></li><li class="box" id="b608"></li></div>
+            <div class="divv" id="row5"><li class="box" id="b501"></li><li class="box" id="b502"></li><li class="box" id="b503"></li><li class="box" id="b504"></li><li class="box" id="b505"></li><li class="box" id="b506"></li><li class="box" id="b507"></li><li class="box" id="b508"></li></div>
+            <div class="divv" id="row4"><li class="box" id="b401"></li><li class="box" id="b402"></li><li class="box" id="b403"></li><li class="box" id="b404"></li><li class="box" id="b405"></li><li class="box" id="b406"></li><li class="box" id="b407"></li><li class="box" id="b408"></li></div>
+            <div class="divv" id="row3"><li class="box" id="b301"></li><li class="box" id="b302"></li><li class="box" id="b303"></li><li class="box" id="b304"></li><li class="box" id="b305"></li><li class="box" id="b306"></li><li class="box" id="b307"></li><li class="box" id="b308"></li></div>
+            <div class="divv" id="row2">
+                <li class="box" id="b201">Wpawn</li><li class="box" id="b202">Wpawn</li><li class="box" id="b203">Wpawn</li><li class="box" id="b204">Wpawn</li>
+                <li class="box" id="b205">Wpawn</li><li class="box" id="b206">Wpawn</li><li class="box" id="b207">Wpawn</li><li class="box" id="b208">Wpawn</li>
+            </div>
+            <div class="divv" id="row1">
+                <li class="box" id="b101">Wrook</li><li class="box" id="b102">Wknight</li><li class="box" id="b103">Wbishop</li><li class="box" id="b104">Wqueen</li>
+                <li class="box" id="b105">Wking</li><li class="box" id="b106">Wbishop</li><li class="box" id="b107">Wknight</li><li class="box" id="b108">Wrook</li>
+            </div>
+        </ul>
+
+        <div class="scoreboard">
+            <div class="score-box">White: <span id="w-score">0</span></div>
+            <div class="score-box">Black: <span id="b-score">0</span></div>
+        </div>
+    </div>
+
+    <div id="winner-overlay">
+        <div id="winner-box">
+            <span id="winner-text">WHITE WINS! ✨</span>
+            <button id="play-again-btn" onclick="location.reload()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        let tog = 1;
+        let whiteScore = 0;
+        let blackScore = 0;
+
+        function insertImage() {
+            document.querySelectorAll('.box').forEach(box => {
+                if (box.innerText.trim().length !== 0) {
+                    let piece = box.innerText.trim();
+                    box.innerHTML = `${piece} <img class='allimg' src="${piece}.png" alt="${piece}">`;
+                } else {
+                    box.innerHTML = '';
+                }
+            });
+        }
+
+        function coloring() {
+            document.querySelectorAll('.box').forEach(box => {
+                let id = box.id;
+                let row = parseInt(id.substring(1, 2));
+                let col = parseInt(id.substring(3, 4));
+                box.style.backgroundColor = (row + col) % 2 == 0 ? '#aab86d' : '#d4dcab';
+            });
+        }
+
+        function filterFriendlyFire() {
+            let activeBox = Array.from(document.querySelectorAll('.box')).find(b => b.style.backgroundColor === 'pink');
+            if (!activeBox) return;
+            let myTeam = activeBox.innerText.trim().charAt(0);
+
+            document.querySelectorAll('.box').forEach(box => {
+                if (box.style.backgroundColor === 'black') {
+                    let targetText = box.innerText.trim();
+                    if (targetText.length !== 0 && targetText.charAt(0) === myTeam) {
+                        let id = box.id;
+                        let r = parseInt(id.substring(1, 2));
+                        let c = parseInt(id.substring(3, 4));
+                        box.style.backgroundColor = (r + c) % 2 === 0 ? '#aab86d' : '#d4dcab';
+                    }
+                }
+            });
+        }
+
+        document.querySelectorAll('.box').forEach(item => {
+            item.addEventListener('click', function () {
+                if (item.style.backgroundColor === 'black') {
+                    let activePieceBox = Array.from(document.querySelectorAll('.box')).find(b => b.style.backgroundColor === 'pink');
+                    if (activePieceBox) {
+                        let targetPiece = item.innerText.trim();
+                        if (targetPiece !== "") {
+                            if (activePieceBox.innerText.trim().startsWith('W')) {
+                                whiteScore++;
+                                document.getElementById('w-score').innerText = whiteScore;
+                            } else {
+                                blackScore++;
+                                document.getElementById('b-score').innerText = blackScore;
+                            }
+                        }
+                        item.innerText = activePieceBox.innerText;
+                        activePieceBox.innerText = '';
+                        tog++;
+                        document.getElementById('tog').innerText = (tog % 2 !== 0) ? "White's Turn ♡" : "Black's Turn ♡";
+                        coloring();
+                        insertImage();
+                        checkWin();
+                        return;
+                    }
+                }
+                coloring(); 
+                let turn = (tog % 2 !== 0) ? 'W' : 'B';
+                if (item.innerText.trim().startsWith(turn)) {
+                    item.style.backgroundColor = 'pink'; 
+                    showPossibleMoves(item);
+                }
+            });
+        });
+
+        function showPossibleMoves(item) {
+            let id = item.id;
+            let row = parseInt(id.substring(1, 2));
+            let col = parseInt(id.substring(3, 4));
+            let val = row * 100 + col;
+            let piece = item.innerText.trim();
+            let team = piece.charAt(0);
+
+            const highlight = (targetId) => {
+                let target = document.getElementById(targetId);
+                if (target) target.style.backgroundColor = 'black';
+            };
+
+            if (piece.endsWith('pawn')) {
+                let dir = (team === 'W') ? 100 : -100;
+                let fwd = document.getElementById(`b${val + dir}`);
+                if (fwd && fwd.innerText.trim() === "") highlight(`b${val + dir}`);
+                [1, -1].forEach(s => {
+                    let cap = document.getElementById(`b${val + dir + s}`);
+                    if (cap && cap.innerText.trim() !== "" && !cap.innerText.trim().startsWith(team)) highlight(cap.id);
+                });
+            }
+            if (piece.endsWith('king')) { [100, -100, 1, -1, 101, 99, -101, -99].forEach(m => highlight(`b${val + m}`)); }
+            if (piece.endsWith('knight')) { [201, 199, 102, 98, -201, -199, -102, -98].forEach(m => highlight(`b${val + m}`)); }
+            if (piece.endsWith('rook') || piece.endsWith('queen')) {
+                [100, -100, 1, -1].forEach(d => {
+                    for (let i = 1; i < 8; i++) {
+                        let t = document.getElementById(`b${val + (d * i)}`);
+                        if (!t || (Math.abs(d) === 1 && Math.floor((val + d * i) / 100) !== row)) break;
+                        highlight(t.id);
+                        if (t.innerText.trim() !== "") break;
+                    }
+                });
+            }
+            if (piece.endsWith('bishop') || piece.endsWith('queen')) {
+                [101, 99, -101, -99].forEach(d => {
+                    for (let i = 1; i < 8; i++) {
+                        let t = document.getElementById(`b${val + (d * i)}`);
+                        if (!t) break;
+                        highlight(t.id);
+                        if (t.innerText.trim() !== "") break;
+                    }
+                });
+            }
+            filterFriendlyFire();
+        }
+
+        function checkWin() {
+            let kings = Array.from(document.querySelectorAll('.box')).filter(b => b.innerText.includes('king'));
+            if (kings.length < 2) {
+                let winner = kings[0].innerText.includes('W') ? "WHITE" : "BLACK";
+                setTimeout(() => {
+                    document.getElementById('winner-text').innerText = winner + " WINS! ✨";
+                    document.getElementById('winner-overlay').style.display = 'flex';
+                }, 400);
+            }
+        }
+
+        coloring();
+        insertImage();
+    </script>
+</body>
+</html>

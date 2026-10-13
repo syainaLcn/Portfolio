@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TAP</title>
+    <style>
+        :root {
+            --neon: #39ff14;
+            --bg: #0d0221;
+            --danger: #ff0055;
+            --white: #ffffff;
+        }
+
+        body {
+            margin: 0; 
+            background: var(--bg); 
+            color: var(--white);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            overflow: hidden;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            height: 100vh; 
+            touch-action: none;
+            user-select: none;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: var(--neon);
+            filter: blur(150px);
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        #stats {
+            position: absolute; 
+            top: 50px; 
+            text-align: center;
+            width: 100%; 
+            pointer-events: none; 
+            z-index: 5;
+        }
+        #score { 
+            font-size: 6rem; 
+            font-weight: 900; 
+            color: var(--neon); 
+            margin: 0; 
+            text-shadow: 0 0 30px var(--neon);
+            line-height: 0.8;
+        }
+        #best-container {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+        }
+
+        #target {
+            position: absolute; 
+            background: var(--neon);
+            border-radius: 50%; 
+            width: 150px; 
+            height: 150px;
+            box-shadow: 0 0 40px var(--neon), inset 0 0 25px white; 
+            display: none; 
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+        }
+
+        #target:active {
+            transform: translate(-50%, -50%) scale(0.85);
+            filter: brightness(1.5);
+        }
+
+        #menu {
+            position: fixed; 
+            inset: 0; 
+            background: rgba(13, 2, 33, 0.98);
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 10; 
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 { 
+            font-size: 4rem; 
+            margin: 0; 
+            color: var(--neon); 
+            text-shadow: 0 0 20px var(--neon);
+            font-style: italic;
+        }
+        
+        #desc { 
+            font-size: 1.1rem; 
+            color: rgba(255,255,255,0.6); 
+            margin: 15px 0 40px 0; 
+            max-width: 250px;
+            line-height: 1.4;
+        }
+
+        button {
+            background: transparent; 
+            border: 2px solid var(--neon); 
+            color: var(--neon);
+            padding: 20px 70px; 
+            font-size: 1.5rem; 
+            font-weight: bold;
+            border-radius: 100px; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        button:active {
+            background: var(--neon);
+            color: var(--bg);
+            box-shadow: 0 0 30px var(--neon);
+        }
+
+        .game-over-shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="stats">
+        <p id="score">0</p>
+        <div id="best-container">BEST Score: <span id="best-val">0</span></div>
+    </div>
+
+    <div id="target"></div>
+
+    <div id="menu">
+        <h1 id="title">TAP</h1>
+        <p id="desc">Tap the circle before it disappears!</p>
+        <button id="start-btn" onclick="play()">Start Game</button>
+    </div>
+
+    <script>
+        const ball = document.getElementById('target');
+        const scoreText = document.getElementById('score');
+        const bestText = document.getElementById('best-val');
+        const menu = document.getElementById('menu');
+        const title = document.getElementById('title');
+        const desc = document.getElementById('desc');
+
+        let score = 0;
+        let size = 150;
+        let speed = 2.8;
+        let isPlaying = false;
+        let highscore = localStorage.getItem('pulse_best_en') || 0;
+
+        bestText.innerText = highscore;
+
+        function play() {
+            score = 0;
+            size = 150;
+            speed = 2.8;
+            scoreText.innerText = score;
+            isPlaying = true;
+            menu.style.display = 'none';
+            ball.style.display = 'block';
+            move();
+            loop();
+        }
+
+        function move() {
+            const padding = 100;
+            let x = Math.random() * (window.innerWidth - padding * 2) + padding;
+            let y = Math.random() * (window.innerHeight - padding * 3) + (padding * 1.5);
+            
+            ball.style.left = x + "px";
+            ball.style.top = y + "px";
+            size = 150; 
+        }
+
+        ball.addEventListener('pointerdown', (e) => {
+            if (!isPlaying) return;
+            e.preventDefault();
+            score++;
+            scoreText.innerText = score;
+            speed += 0.18; // Speed scales up faster now
+            move();
+        });
+
+        function loop() {
+            if (!isPlaying) return;
+
+            size -= speed;
+            ball.style.width = size + "px";
+            ball.style.height = size + "px";
+
+            if (size <= 10) {
+                stop();
+            } else {
+                requestAnimationFrame(loop);
+            }
+        }
+
+        function stop() {
+            isPlaying = false;
+            ball.style.display = 'none';
+            menu.style.display = 'flex';
+            document.body.classList.add('game-over-shake');
+            setTimeout(() => document.body.classList.remove('game-over-shake'), 400);
+            
+            if (score > highscore) {
+                highscore = score;
+                localStorage.setItem('pulse_best_en', highscore);
+                bestText.innerText = highscore;
+                title.innerText = "NEW RECORD!";
+                title.style.color = "var(--neon)";
+            } else {
+                title.innerText = "GAME OVER";
+                title.style.color = "var(--danger)";
+            }
+
+            desc.innerText = "Your final score: " + score;
+            document.getElementById('start-btn').innerText = "Try Again";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guessing Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #1a0000; 
+            --bg-gradient: #330000; 
+            --container-bg: #4d0000;
+            --border-color: #800000; 
+            --input-bg: #1a0000; 
+            --btn-color: #b30000; 
+            --btn-hover: #e60000; 
+            --text-main: #f5f5f5; 
+            --text-muted: #808080; 
+            --text-highlight: #ff6666; 
+            --success-color: #33ff33; 
+        }
+
+        body {
+            font-family: 'Arial Black', sans-serif;
+            background: radial-gradient(circle, var(--bg-gradient), var(--bg-dark));
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--container-bg);
+            border: 2px solid var(--border-color);
+            padding: 2.5rem;
+            border-radius: 12px;
+            text-align: center;
+            width: 400px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.8);
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            color: var(--text-main);
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        #hint-display {
+            font-size: 1.1rem;
+            height: 50px;
+            color: var(--text-highlight);
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        input[type="number"] {
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            padding: 15px;
+            color: var(--text-main);
+            font-size: 1.8rem;
+            width: 80%;
+            text-align: center;
+            outline: none;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        input[type="number"]::placeholder {
+            color: var(--border-color);
+        }
+
+        .btn {
+            background: var(--btn-color);
+            border: none;
+            color: var(--text-main);
+            padding: 15px 30px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            width: 100%;
+            border-radius: 4px;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .btn:hover {
+            background: var(--btn-hover);
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(230,0,0,0.5);
+        }
+
+        .stats {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+            color: var(--text-muted);
+        }
+
+        .stats b {
+            color: var(--text-main);
+        }
+
+        .success { color: var(--success-color); }
+        .fail { color: var(--text-highlight); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>GUESS THE NUMBER</h1>
+        <p style="font-size: 0.7rem; color: var(--border-color); margin-top: -20px; margin-bottom: 20px;">Range: 1 to 100</p>
+        
+        <div id="hint-display">Can you guess it?</div>
+
+        <input type="number" id="guess-input" placeholder="00" min="1" max="100">
+        
+        <button class="btn" onclick="checkGuess()">SUBMIT GUESS</button>
+
+        <div class="stats">
+            <span>ATTEMPTS: <b id="attempts">0</b></span>
+            <span>BEST: <b id="best-score">-</b></span>
+        </div>
+    </div>
+
+    <script>
+        let targetNumber = Math.floor(Math.random() * 100) + 1;
+        let attempts = 0;
+        let bestScore = localStorage.getItem('bestScore') || "-";
+        
+        document.getElementById('best-score').innerText = bestScore;
+
+        function checkGuess() {
+            const input = document.getElementById('guess-input');
+            const hint = document.getElementById('hint-display');
+            const val = parseInt(input.value);
+
+            if (isNaN(val) || val < 1 || val > 100) {
+                hint.innerText = "Enter 1 to 100 only!";
+                return;
+            }
+
+            attempts++;
+            document.getElementById('attempts').innerText = attempts;
+
+            if (val === targetNumber) {
+                hint.innerHTML = `<span class="success">CORRECT! It was ${targetNumber}</span>`;
+                if (bestScore === "-" || attempts < bestScore) {
+                    bestScore = attempts;
+                    localStorage.setItem('bestScore', bestScore);
+                    document.getElementById('best-score').innerText = bestScore;
+                }
+                setTimeout(resetGame, 3000);
+            } else if (val < targetNumber) {
+                hint.innerHTML = '<span class="fail">HIGHER <i class="fa-solid fa-arrow-up"></i></span>';
+            } else {
+                hint.innerHTML = '<span class="fail">LOWER <i class="fa-solid fa-arrow-down"></i></span>';
+            }
+
+            input.value = "";
+            input.focus();
+        }
+
+        function resetGame() {
+            targetNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+            document.getElementById('attempts').innerText = 0;
+            document.getElementById('hint-display').innerText = "New number set! Guess again.";
+        }
+    </script>
+</body>
+</html>

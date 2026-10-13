@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cyber-Sweeper</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0;
+            background: #000; 
+            overflow: hidden; 
+            font-family: sans-serif; 
+            cursor: crosshair; 
+        }
+
+        canvas { 
+            display: block; 
+        }
+
+        #ui { 
+            position: absolute; 
+            top: 20px; 
+            width: 100%; 
+            text-align: center; 
+            color: #39ff14; 
+            pointer-events: none; 
+            z-index: 5;
+        }
+
+        .score-box { 
+            font-size: 3.5rem; 
+            font-weight: 900; 
+            text-shadow: 0 0 20px rgba(57, 255, 20, 0.6);
+            margin: 0;
+        }
+
+        .best-box { 
+            font-size: 1rem; 
+            color: #ff0055; 
+            letter-spacing: 2px;
+        }
+
+        #overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0, 0, 0, 0.9); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            z-index: 10; 
+            text-align: center;
+            backdrop-filter: blur(8px);
+        }
+
+        #warning { 
+            color: #ff0055; 
+            font-weight: bold; 
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            animation: blink 0.5s infinite; 
+        }
+
+        h1 { 
+            font-size: 4rem; 
+            margin: 0; 
+            color: #39ff14; 
+        }
+
+        p { 
+            font-size: 1.2rem; 
+            color: #fff; 
+            margin: 15px 0;
+        }
+
+        button { 
+            background: #39ff14; 
+            border: none; 
+            color: #000; 
+            padding: 20px 60px; 
+            font-size: 1.5rem; 
+            cursor: pointer; 
+            font-weight: bold; 
+            border-radius: 8px; 
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+
+        button:hover { 
+            background: #fff; 
+            transform: scale(1.1);
+        }
+
+        @keyframes blink { 
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; } 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <div class="score-box" id="score">0</div>
+        <div class="best-box">BEST: <span id="best">0</span></div>
+    </div>
+
+    <div id="overlay">
+        <div id="warning">READY?</div>
+        <h1>Cyber Sweeper</h1>
+        <p id="status">Don't let them touch you.</p>
+        <button onclick="start()">START?</button>
+    </div>
+
+    <canvas id="game"></canvas>
+
+<script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    const bestEl = document.getElementById('best');
+    const overlay = document.getElementById('overlay');
+    const statusEl = document.getElementById('status');
+
+    let player = { x: window.innerWidth/2, y: window.innerHeight/2, r: 15 };
+    let enemies = [], bullets = [], particles = [];
+    let score = 0, active = false;
+    let lastFireTime = 0, lastSpawnTime = 0;
+
+    let bestScore = localStorage.getItem('horde_best') || 0;
+    bestEl.innerText = bestScore;
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.onresize = resize;
+    resize();
+
+    window.onmousemove = (e) => {
+        if(!active) return;
+        player.x = e.clientX;
+        player.y = e.clientY;
+    };
+
+    function start() {
+        enemies = []; bullets = []; particles = [];
+        score = 0; scoreEl.innerText = "0";
+        active = true;
+        overlay.style.display = 'none';
+        requestAnimationFrame(loop);
+    }
+
+    function createExplosion(x, y, color) {
+        for(let i = 0; i < 10; i++) {
+            particles.push({
+                x, y,
+                vx: (Math.random() - 0.5) * 12,
+                vy: (Math.random() - 0.5) * 12,
+                alpha: 1,
+                color: color
+            });
+        }
+    }
+
+    function loop(timestamp) {
+        if (!active) return;
+
+        // Enemy Spawning
+        if (timestamp - lastSpawnTime > 500) {
+            const batchSize = 4 + Math.floor(score / 100);
+            for(let i = 0; i < batchSize; i++) {
+                const side = Math.floor(Math.random() * 4);
+                let x, y;
+                if (side === 0) { x = Math.random() * canvas.width; y = -50; }
+                else if (side === 1) { x = canvas.width + 50; y = Math.random() * canvas.height; }
+                else if (side === 2) { x = Math.random() * canvas.width; y = canvas.height + 50; }
+                else { x = -50; y = Math.random() * canvas.height; }
+                enemies.push({ x, y, size: 12 + Math.random()*8, speed: 2 + (score * 0.002) });
+            }
+            lastSpawnTime = timestamp;
+        }
+
+        // Auto Fire
+        if (timestamp - lastFireTime > 130 && enemies.length > 0) {
+            let target = enemies[0];
+            let angle = Math.atan2(target.y - player.y, target.x - player.x);
+            for(let j = -2; j <= 2; j++) {
+                bullets.push({ x: player.x, y: player.y, vx: Math.cos(angle + j*0.15) * 16, vy: Math.sin(angle + j*0.15) * 16 });
+            }
+            lastFireTime = timestamp;
+        }
+
+        // Background
+        ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Particles
+        particles.forEach((p, i) => {
+            p.x += p.vx; p.y += p.vy; p.alpha -= 0.03;
+            if(p.alpha <= 0) particles.splice(i, 1);
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, 3, 3);
+        });
+        ctx.globalAlpha = 1;
+
+        // Player
+        ctx.fillStyle = "#39ff14";
+        ctx.shadowBlur = 20; ctx.shadowColor = "#39ff14";
+        ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI*2); ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Bullets
+        ctx.fillStyle = "#fff";
+        bullets.forEach((b, i) => {
+            b.x += b.vx; b.y += b.vy;
+            ctx.fillRect(b.x, b.y, 4, 4);
+            if(b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) bullets.splice(i, 1);
+        });
+
+        // Enemies
+        enemies.forEach((e, i) => {
+            let angle = Math.atan2(player.y - e.y, player.x - e.x);
+            e.x += Math.cos(angle) * e.speed;
+            e.y += Math.sin(angle) * e.speed;
+            ctx.fillStyle = "#ff0055";
+            ctx.fillRect(e.x - e.size/2, e.y - e.size/2, e.size, e.size);
+
+            // Collision Check
+            if (Math.hypot(e.x - player.x, e.y - player.y) < player.r + e.size/2) gameOver();
+
+            bullets.forEach((b, j) => {
+                if (b.x > e.x - e.size/2 && b.x < e.x + e.size/2 && b.y > e.y - e.size/2 && b.y < e.y + e.size/2) {
+                    createExplosion(e.x, e.y, "#ff0055");
+                    enemies.splice(i, 1);
+                    bullets.splice(j, 1);
+                    score++; scoreEl.innerText = score;
+                }
+            });
+        });
+
+        requestAnimationFrame(loop);
+    }
+
+    function gameOver() {
+        active = false;
+        if (score > bestScore) {
+            bestScore = score;
+            localStorage.setItem('horde_best', bestScore);
+            bestEl.innerText = bestScore;
+        }
+        overlay.style.display = 'flex';
+        document.getElementById('warning').innerText = "GAME OVER";
+        statusEl.innerText = `SCORE: ${score} | BEST: ${bestScore}`;
+        document.querySelector('button').innerText = "AGAIN?";
+    }
+</script>
+</body>
+</html>

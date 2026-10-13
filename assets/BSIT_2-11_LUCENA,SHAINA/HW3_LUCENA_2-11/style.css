@@ -1,0 +1,424 @@
+/* ===================================================
+   1. GLOBAL VARIABLES & RESET
+   =================================================== */
+:root {
+    --darkpink: #E94E77;
+    --lighttan: #EEEBE6;
+    --rose: #D68189;
+    --tan: #C6A49A;
+    --ivory: #E3CFB4;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    background-color: white;
+}
+
+/* Para sa lahat ng H3 titles (Home at About) */
+h3 {
+    letter-spacing: 15px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+/* ===================================================
+   2. HEADER / NAVIGATION (Shared)
+   =================================================== */
+.header {
+    padding: 15px 2%; /* 2% para hindi masyadong malayo ang logo sa gilid */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo img { width: 250px; }
+
+.menu { display: flex; gap: 10px; }
+
+.menu a {
+    background: var(--rose);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+}
+.menu a:hover {
+    background-color: var(--darkpink); /* Rose to Dark Pink [cite: 10] */
+    transform: translateY(-5px); /* Move up animation [cite: 11] */
+    transition: all 0.3s ease;
+}
+
+/* 5. BUTTON HOVER REQUIREMENTS [cite: 12] */
+button:hover {
+    background-color: black; /* Dark Pink to Black [cite: 12] */
+}
+
+/* ===================================================
+   3. HOME PAGE SECTIONS
+   =================================================== */
+
+/* Welcome at Info paragraphs */
+.welcome, .info {
+    width: 60%;
+    margin: 0 auto;
+    padding: 50px 0;
+    line-height: 1.6;
+}
+
+.welcome h1, .info h3 {
+    text-align: center;
+}
+
+.welcome p, .info p {
+    text-align: justify; /* Pantay ang gilid ng text sa Home */
+    text-justify: inter-word;
+}
+
+/* Featured Lesson Section */
+.featured {
+    background: #f0ebe6;
+    text-align: center;
+    padding: 50px 0;
+}
+
+.featured-img {
+    width: 65%;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+.featured-content {
+    width: 65%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 40px;
+    text-align: left;
+}
+
+.featured-text { flex: 2; }
+.featured-text p { text-align: justify; }
+
+/* Price Box / Enroll Box */
+.price-box {
+    flex: 1;
+    background: var(--tan); 
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    color: white;
+}
+
+.price-circle {
+    background: var(--ivory);
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 15px auto;
+    font-size: 2.5em;
+    font-weight: bold;
+    color: var(--darkpink);
+}
+
+.price-box button {
+    background: var(--darkpink);
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Masterclass Cards Section */
+.masterclass {
+    background: #f0ebe6;
+    padding: 60px 5px;
+    text-align: center;
+}
+
+.cards {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 0 5%;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.card img { border-radius: 8px; margin-bottom: 12px; width: 100%; }
+.card p { text-align: justify; font-size: 14px; }
+
+/* Pink Skill Level Box */
+.skill-box {
+    background-color: var(--darkpink);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: fit-content;
+}
+
+.skill-box p { text-align: center !important; font-size: 15px; margin: 0; }
+.skill-box span { display: block; color: black; font-weight: bold; font-size: 12px; letter-spacing: 1px; }
+
+/* ===================================================
+   4. ABOUT PAGE SECTIONS (UPDATED BASED ON DESIGN)
+   =================================================== */
+
+/* Banner with Pattern */
+.hero-banner {
+    background-color: var(--tan);
+    background-image: url("IMAGES/bg_tile.png"); /* Idagdag ang pattern image mo rito */
+    color: white;
+    padding: 40px 5%;
+    text-align: left;
+}
+
+.hero-banner h2 { 
+    margin: 0; 
+    font-size: 2.5em; 
+    letter-spacing: 15px;
+}
+
+/* Origami Masters Section - Larger Circular Profiles */
+.masters-section {
+    padding: 80px 0;
+    text-align: center;
+}
+
+.master-grid {
+    display: flex;
+    justify-content: center;
+    gap: 80px; /* Mas malawak na space sa pagitan */
+    margin-top: 40px;
+}
+
+.img-frame img {
+    width: 250px; /* Mas malaking size gaya ng nasa picture */
+    height: 250px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: none; /* Tinanggal ang border frame */
+    margin-bottom: 20px;
+}
+
+/* School Masters Section - No Background Boxes */
+.school-section {
+    background-color: var(--lighttan);
+    padding: 80px 5%;
+    text-align: center;
+}
+
+.school-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 100px; /* Distansya ng Headmaster sa Staff Grid */
+    max-width: 1200px;
+    margin: 50px auto 0;
+}
+
+/* Headmaster Side */
+.main-leader {
+    flex: 1;
+    background: none; /* Tinanggal ang puting box */
+    padding: 0;
+}
+
+.main-leader img {
+    width: 350px; /* Mas malaking main image */
+    border-radius: 15px;
+}
+
+.main-leader h4 { margin-top: 20px; font-size: 1.5em; }
+
+/* Staff Grid Side - Simple and Centered */
+.staff-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px 60px; /* Space sa pagitan ng mga staff */
+}
+
+.staff-item {
+    background: none; /* Tinanggal ang puting box */
+    padding: 0;
+    display: flex;
+    flex-direction: column; /* Stack image and text vertically */
+    align-items: center;
+    text-align: center;
+}
+
+.staff-item img {
+    width: 120px; /* Mas malaking bilog na profile */
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+}
+
+.staff-info h4 { margin: 0; font-size: 1.1em; }
+.staff-info p { 
+    margin: 5px 0 0; 
+    font-size: 0.9em; 
+    color: #333; 
+    text-align: center !important; 
+}
+
+/* ===================================================
+   4. LESSONS PAGE SECTIONS 
+   =================================================== */
+.masterclasss {
+    background: white;
+    padding: 60px 5px;
+    text-align: center;
+}
+
+.lessons-grid {
+    display: flex;
+    flex-wrap: wrap; /* Allows cards to wrap into rows */
+    justify-content: center;
+    gap: 25px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.lesson-card {
+    background-color: var(--ivory);
+    width: 250px;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.lesson-card img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* Enroll Button Hover: Background turns dark pink to black [cite: 12] */
+.enroll-btn {
+    background-color: var(--darkpink);
+    color: white;
+    border: none;
+    padding: 8px 25px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.enroll-btn:hover {
+    background-color: black;
+}
+
+/* --- VIDEO LESSONS SECTION --- */
+.video-lessons {
+    background-color: var(--lighttan); /* Ginagamit ang !important para masiguradong ito ang masusunod */
+    padding: 80px 5%; /* Dinagdagan ang padding para lumitaw ang background sa taas at baba */
+    text-align: center;
+    width: 100%; /* Siguraduhing sakop ang buong lapad */
+    box-sizing: border-box;
+}
+
+.video-grid {
+    display: flex; /* Flexbox requirement  */
+    justify-content: center;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.video-item {
+    flex: 1; /* Pantay na laki ang tatlong video  */
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Container para maging responsive at 16:9 ang ratio ng YouTube */
+.video-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    height: 0;
+    overflow: hidden;
+    border-radius: 5px;
+}
+
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.video-item h4 {
+    margin-top: 15px;
+    font-family: 'Roboto', sans-serif; /*  */
+    text-transform: none; /* Para readable ang title */
+}
+
+/* ===================================================
+   5. FOOTER (Shared)
+   =================================================== */
+.footer {
+    background-color: var(--tan); /* [cite: 24] */
+    padding: 20px 2%;
+    display: flex; /* Requirement: Flexbox  */
+    justify-content: space-between; /* Ito ang nagtutulak sa 'footer-right' papuntang kanan */
+    align-items: center;
+}
+
+.footer-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.footer-logo {
+    width: 200px; /* I-adjust base sa laki ng logo mo */
+}
+
+.footer-text p {
+    margin: 0;
+    font-size: 14px;
+    color: black;
+    text-align: left !important;
+    line-height: 1.4;
+}
+
+.footer-right p {
+    color: #333;
+    font-size: 14px;
+    margin: 0;
+    font-weight: bold;
+}

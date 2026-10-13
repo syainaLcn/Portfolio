@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky 9</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;       
+            --card-bg: #1e293b;       
+            --accent-cyan: #22d3ee;  
+            --accent-pink: #f472b6;  
+            --text-light: #f8fafc;
+            --border-glow: #334155;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-light);
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), 0 0 5px var(--accent-cyan);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            border: 1px solid var(--border-glow);
+        }
+
+        .hidden { display: none; }
+
+        h1 { 
+            color: var(--accent-cyan);
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+        }
+
+        .menu-buttons button, .action-btn {
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--accent-cyan);
+            padding: 12px 20px;
+            margin: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 85%;
+            transition: all 0.3s ease;
+        }
+
+        .menu-buttons button:hover, .action-btn:hover {
+            background-color: var(--accent-cyan);
+            color: var(--bg-dark);
+            box-shadow: 0 0 15px var(--accent-cyan);
+        }
+
+        input {
+            width: 80%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid var(--border-glow);
+            border-radius: 8px;
+            background: #0f172a;
+            color: white;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .log-area {
+            background: #0f172a;
+            height: 200px;
+            overflow-y: auto;
+            margin: 20px 0;
+            padding: 15px;
+            text-align: left;
+            font-family: 'Consolas', monospace;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-cyan);
+            font-size: 14px;
+        }
+
+        .stats-bar {
+            background: #334155;
+            color: var(--accent-cyan);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .card-tag { color: var(--accent-pink); font-weight: bold; }
+        .result-win { color: #4ade80; }
+        .result-loss { color: #fb7185; }
+
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-glow);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="menu-screen">
+            <h1>LUCKY 9</h1>
+            <div class="menu-buttons">
+                <button onclick="showScreen('setup-screen')">START GAME</button>
+                <button onclick="viewLeaderboard()">LEADERBOARD</button>
+                <button onclick="window.close()">EXIT</button>
+            </div>
+        </div>
+
+        <div id="setup-screen" class="hidden">
+            <h2 style="color:var(--accent-cyan)">GAME SETUP</h2>
+            <input type="text" id="dealer-name" placeholder="Dealer Name">
+            <input type="number" id="cash-fund" placeholder="Initial Cash ($)">
+            <input type="number" id="num-players" placeholder="No. of Players (1-20)">
+            <button class="action-btn" onclick="startGame()">START</button>
+            <p onclick="showScreen('menu-screen')" style="cursor:pointer; color:var(--accent-pink); font-size: 0.9rem;">← Cancel</p>
+        </div>
+
+        <div id="game-screen" class="hidden">
+            <div class="stats-bar">
+                <span id="display-dealer-name"></span>
+                <span id="display-fund"></span>
+            </div>
+            <div id="game-log" class="log-area"></div>
+            <div id="controls"></div>
+        </div>
+
+        <div id="leaderboard-screen" class="hidden">
+            <h2 style="color:var(--accent-cyan)">TOP RECORDS</h2>
+            <div id="leaderboard-list"></div>
+            <br>
+            <button class="action-btn" onclick="showScreen('menu-screen')">BACK TO TERMINAL</button>
+        </div>
+    </div>
+
+    <script>
+        let dealer = { name: "", fund: 0 };
+        let players = [];
+        let leaderboard = JSON.parse(localStorage.getItem('lucky9_tech_lb')) || [];
+
+        function showScreen(id) {
+            document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function startGame() {
+            dealer.name = document.getElementById('dealer-name').value || "Admin";
+            dealer.fund = parseFloat(document.getElementById('cash-fund').value) || 0;
+            let count = parseInt(document.getElementById('num-players').value);
+
+            if (isNaN(dealer.fund) || count < 1 || count > 20) {
+                alert("Invalid input parameters.");
+                return;
+            }
+
+            players = Array.from({ length: count }, (_, i) => ({
+                id: i + 1,
+                bet: Math.floor(Math.random() * 81) + 20
+            }));
+
+            showScreen('game-screen');
+            startRound();
+        }
+
+        function getCard() {
+            const val = Math.floor(Math.random() * 13) + 1;
+            const suits = ["♠", "♦", "♥", "♣"];
+            let name = val;
+            if (val === 1) name = "A";
+            else if (val === 11) name = "J";
+            else if (val === 12) name = "Q";
+            else if (val === 13) name = "K";
+            return { name, value: val >= 10 ? 0 : val, fullName: `${name}${suits[Math.floor(Math.random()*4)]}` };
+        }
+
+        function startRound() {
+            const log = document.getElementById('game-log');
+            log.innerHTML = "> Executing Dealer Turn...<br>";
+            
+            document.getElementById('display-dealer-name').innerText = `ID: ${dealer.name.toUpperCase()}`;
+            document.getElementById('display-fund').innerText = `CREDITS: $${dealer.fund.toFixed(2)}`;
+
+            let d1 = getCard(), d2 = getCard();
+            let dTotal = d1.value + d2.value;
+            
+            log.innerHTML += `> Received: [<span class="card-tag">${d1.fullName}</span>][<span class="card-tag">${d2.fullName}</span>]<br>`;
+
+            document.getElementById('controls').innerHTML = `
+                <button class="action-btn" onclick="dealerDraw(${dTotal}, true)">DRAW 3RD CARD</button>
+                <button class="action-btn" onclick="dealerDraw(${dTotal}, false)">STAND</button>
+            `;
+        }
+
+        function dealerDraw(currentTotal, draw) {
+            let finalTotal = currentTotal;
+            const log = document.getElementById('game-log');
+            
+            if (draw) {
+                let d3 = getCard();
+                finalTotal += d3.value;
+                log.innerHTML += `> 3rd Card: [<span class="card-tag">${d3.fullName}</span>]<br>`;
+            }
+
+            let dFinal = finalTotal % 10;
+            log.innerHTML += `> Dealer Value: ${dFinal}<br><br>> Scanning Players...<br>`;
+
+            let win = 0, loss = 0;
+            players.forEach(p => {
+                let pT = getCard().value + getCard().value;
+                if ((pT % 10) < 7) pT += getCard().value;
+                let pFinal = pT % 10;
+
+                log.innerHTML += `P${p.id}: ${pFinal} | `;
+                if (pFinal > dFinal) {
+                    let prize = (pFinal === 9) ? p.bet * 3 : p.bet * 2;
+                    loss += prize;
+                    log.innerHTML += `<span class="result-win">WIN -$${prize}</span><br>`;
+                } else if (pFinal < dFinal) {
+                    win += p.bet;
+                    log.innerHTML += `<span class="result-loss">LOSS +$${p.bet}</span><br>`;
+                } else {
+                    log.innerHTML += `PUSH<br>`;
+                }
+            });
+
+            dealer.fund = (dealer.fund + win) - loss;
+            document.getElementById('display-fund').innerText = `CREDITS: $${dealer.fund.toFixed(2)}`;
+
+            document.getElementById('controls').innerHTML = `
+                <button class="action-btn" style="border-color:#4ade80" onclick="startRound()">CONTINUE SESSION</button>
+                <button class="action-btn" onclick="saveAndQuit()">TERMINATE & SAVE</button>
+            `;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function saveAndQuit() {
+            leaderboard.push({ name: dealer.name, fund: dealer.fund });
+            leaderboard.sort((a, b) => b.fund - a.fund);
+            leaderboard = leaderboard.slice(0, 10);
+            localStorage.setItem('lucky9_tech_lb', JSON.stringify(leaderboard));
+            showScreen('menu-screen');
+        }
+
+        function viewLeaderboard() {
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = leaderboard.map((e, i) => `
+                <div class="leaderboard-entry">
+                    <span>${i+1}. ${e.name}</span>
+                    <span style="color:var(--accent-cyan)">$${e.fund.toFixed(2)}</span>
+                </div>
+            `).join('') || "NO DATA FOUND.";
+            showScreen('leaderboard-screen');
+        }
+    </script>
+</body>
+</html>

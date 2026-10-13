@@ -1,0 +1,282 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    background-color: white;
+}
+
+:root {
+    --darkpink: #E94E77;
+    --lighttan: #EEEBE6;
+    --rose: #D68189;
+    --tan: #C6A49A;
+    --ivory: #E3CFB4;
+}
+
+.header{
+    padding:15px 2%;
+	overflow: hidden;	
+}
+
+.logo{
+	float:left;
+}
+
+nav{
+	float:right;
+	line-height:70px;
+}
+
+.logo img{
+    width: 250px;
+	vertical-align:middle;
+	margin-right:1000px;
+}
+
+.menu a{
+    background: var(--rose);
+    color: white;
+    margin: 5px;
+    padding: 15px;
+    size: 30px;
+	padding: 5px 5px;
+	border-radius: 5px;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+.welcome{
+    width:60%;
+    margin:auto;
+    text-align:center;
+    padding:40px;
+}
+
+.welcome1{
+	text-align:justify;
+}
+
+.featured{
+    background:#f0ebe6;
+    text-align:center;
+    padding:40px;
+}
+
+.featured-img{
+    width:65%;
+    margin:20px;
+	border-radius: 10px;
+}
+
+.featured-content{
+    width:65%;
+	margin:auto;
+	overflow:hidden;
+}
+
+.featured-text{
+    float:left;
+	width:60%;
+	text-align:left;
+	margin-right:0;
+}
+
+.currency {
+	font-size:14px;
+	position:relative;
+	top:-5px;
+    color: #E94E77;
+}
+
+.price-box{
+	float:right;
+	background:#C6A49A;
+	color:white;
+	padding:5px 5px;
+    width:20%;
+	align-items:center;
+	border-radius:10px;
+	margin-left:5px;
+	text-align:center;
+}
+
+
+.price-box button{
+	margin-top:10px;
+	width:100px;
+    background:var(--darkpink);
+    color:white;
+    padding:5px 5px;
+	text-align:center;
+    border:none;
+	border-radius:5px;
+    font-weight:bold;
+
+}
+
+.info{
+    width:60%;
+    margin:auto;
+    padding:40px 0;
+}
+
+.masterclass{
+    background:#f0ebe6;
+    text-align:center;
+    padding:40px;
+}
+
+.card{
+    width:15%;
+    background:#fff;
+    padding:20px;
+    text-align:center;
+    border-radius:10px;
+	display:inline-block;
+	vertical-align:top;
+	margin: 1%;
+}
+
+.card img{
+    width:100%;
+    border-radius:10px;
+}
+
+.skills{
+    margin-top:15px;
+	width:100px;
+	padding:5px 5px;
+    background:var(--darkpink);
+    padding:10px;
+	text-align:center;
+    border-radius:10px;
+    font-weight:bold;
+}
+
+.skill{
+    background:var(--darkpink);
+	text-align:left;
+    color:white;
+    padding:10px;
+    margin-top:10px;
+	width:100px;
+}
+
+span{
+    display:block;
+    color: black;
+}
+
+.footer {
+    background-color:var(--tan); 
+    padding:20px;
+    overflow:hidden;
+}
+
+.footer img, .footer_text {
+    float:left;
+}
+
+.footer img {
+    width:200px;
+    height:auto;
+    margin-right:15px; 
+}
+
+.footer_text p {
+    margin:0;
+}
+
+.footer_text span {
+    display:block;   
+    font-size:14px;
+    line-height:1.4;
+    color:#333;
+}
+
+.designer {
+    float:right;
+    margin:0;
+    font-size:13px;
+    padding-top:15px; 
+    color:#555;
+}
+
+.hero-banner {
+    background-color: var(--tan);
+    color: white;
+    padding: 20px;
+    text-align: left;
+    padding-left: 5%;
+    background-image: url("../HW2_LUCENA_2-11/IMAGES/bg_tile.png");
+}
+.masters-section { 
+    padding: 50px 0; 
+    text-align: center;  
+} 
+ 
+.master-grid { 
+    text-align: center;  
+    margin-top: 20px; 
+} 
+ 
+.profile { 
+    display: inline-block; 
+    vertical-align: top; 
+    width: 200px; 
+    margin: 0 40px; 
+} 
+ 
+.circle { 
+    width: 150px; 
+    height: 150px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    border: 5px solid var(--ivory); 
+} 
+ 
+.school-section { 
+    background-color: var(--lighttan);  
+    padding: 50px 5%; 
+    text-align: center; 
+} 
+ 
+.school-layout { 
+    display: block; 
+    max-width: 1000px; 
+    margin: 0 auto; 
+    overflow: hidden; 
+} 
+ 
+.main-leader { 
+    float: left; 
+    width: 40%; 
+    text-align: center; 
+} 
+ 
+.main-leader img { 
+    width: 250px; 
+    border-radius: 15px; 
+} 
+ 
+.staff-grid { 
+    float: right; 
+    width: 50%; 
+    text-align: left; 
+    margin-top: 30px; 
+} 
+ 
+.staff-item { 
+    display: inline-block; 
+    width: 45%;  
+    margin-bottom: 20px; 
+    text-align: center; 
+    vertical-align: top; 
+} 
+ 
+.staff-img { 
+    width: 80px; 
+    height: 80px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+} 
+ 

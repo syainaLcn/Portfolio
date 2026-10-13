@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Me | Lucena</title>
+    <link rel="stylesheet" href="style/styles.css">
+    <link rel="icon" href="assets/images/favicon.png" >
+</head> 
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <a href="index.html">
+                <img src="assets/images/favicon.png" alt="Shaina D. Lucena" class="nav-logo-img">
+            </a>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="about.html" class="active">About</a>
+            <a href="skill.html">Skills</a>
+            <a href="projects.html">Projects</a>
+            <a href="poems.html">Poems</a>
+        </div>
+    </nav>
+
+    <section class="about-hero">
+        <div class="hero-texts">
+            <p class="greeting">Hello! Get to Know Me</p>
+            <h1 class="main-names">Behind the <span> Code</span></h1>
+            <p class="sub-headlines">BSIT Student | Aspiring Cybersecurity Professional & Game Developer</p>
+            <p class="descriptions">
+                Hi, I’m <strong>Shaina D. Lucena</strong>.
+                An aspiring IT professional passionate about networking, cybersecurity and game development. 
+                I enjoy learning new technologies, solving technical challenges, and 
+                building skills that will help me grow in the IT industry. 
+                Outside the tech world, I express my thoughts through <strong>poetry and writing</strong>.
+            </p>
+        </div>
+
+        <div class="hero-visuals">
+            <div class="profile-about-page-card">
+                <img src="assets/images/formalssss.jpeg" alt="Shaina Lucena" class="profile-img rectangle-img">
+            </div>
+        </div>
+    </section>
+    <hr class="ruby-line">
+
+    <section class="about-details">
+        <div class="about-container">
+            
+            <div class="education-card">
+                <h3>Education</h3>
+                <div class="edu-item">
+                    <span class="about-info">2024 – Present</span>
+                    <p><strong>Pamantasan ng Lungsod ng Valenzuela (PLV)</strong> | BS Information Technology</p>
+                </div>
+                <div class="edu-item">
+                    <span class="about-info">2022 – 2024</span>
+                    <p><strong>Electron College of Technical Education</strong> | ICT Programming (High Honors)</p>
+                </div>
+                <div class="edu-item">
+                    <span class="about-info">2018 – 2022</span>
+                    <p><strong>Sitero Francisco Memorial National High School</strong> | With Honors</p>
+                </div>
+            </div>
+
+            <div class="hobbies-card">
+                <h3>Beyond the Code</h3>
+                <p>I immerse myself in <strong>creative writing and spoken word poetry</strong>. I find inspiration in nature and quiet moments.</p>
+            </div>
+
+            
+
+            <div class="values-card">
+                <h3>Core Values</h3>
+                <ul>
+                    <li>Growth over perfection</li>
+                    <li>Discipline and consistency</li>
+                    <li>Peace and simplicity</li>
+                </ul>
+            </div>
+
+            <div class="about-visual"> 
+                <div class="code-box"> 
+                    <div class="window-dots">● ● ●</div>
+                    <pre><code><span class="keyword">const</span> <span class="variable">shaina</span> = {
+                    role: <span class="string">"BSIT Student"</span>,
+                    Age: <span class="string">"20"</span>,
+                    interests: [<span class="string">"Networking"</span>, <span class="string">"Hardware"</span>, <span class="string">"Game"</span>],
+                    creativeSide: <span class="string">"Poetry"</span>
+                };</code></pre>
+                </div> 
+            </div>
+        </div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-left">
+                <a href="index.html">
+                    <img src="assets/images/favicon.png" alt="Shaina D. Lucena" class="brand-logo">
+                </a>
+            </div>
+
+            <div class="footer-right">
+                <h4 class="section-title-pink">Connect me!</h4>
+                
+                <div class="socials">
+                    <a href="https://github.com/syainaLcn" target="_blank" title="GitHub">
+                        <img src="assets/images/github.png" alt="GitHub" class="footer-icon">
+                    </a>
+                    <a href="https://www.linkedin.com/in/shaina-lucena-44605b3bb?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" title="LinkedIn">
+                        <img src="assets/images/linkedin.png" alt="LinkedIn" class="footer-icon">
+                    </a>
+                    <a href="javascript:void(0)" onclick="openContact()" title="Email">
+                        <img src="assets/images/gmail.png" alt="Email" class="footer-icon">
+                    </a>
+                    <a href="https://www.facebook.com/share/1CU4yWrbmx/" target="_blank" title="Facebook">
+                        <img src="assets/images/facebook.png" alt="Facebook" class="footer-icon">
+                    </a>
+                    <a href="https://www.instagram.com/tiny_luntian?igsh=MWU2bWZsaWYwbHhldQ==" target="_blank" title="Instagram">
+                        <img src="assets/images/instagram.png" alt="Instagram" class="footer-icon">
+                    </a>
+                    
+                    
+                </div>
+
+                <div class="footer-info">
+                    <p class="copyright-text">Copyright © 2026 Shaina D. Lucena</p>
+                    <p class="legal-text">All Rights Reserved</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div id="contact-overlay" class="overlay-container">
+        <div class="overlay-card contact-card">
+            <button class="close-overlay" onclick="closeContact()">&times;</button>
+            <div class="contact-content">
+                <h2 class="f-title">Get in Touch</h2>
+                <form id="contact-form">
+                    <div class="form-group">
+                        <input type="text" name="user_name" placeholder="First Name" required>
+                        <input type="text" name="user_last" placeholder="Last Name" required>
+                    </div>
+                    <input type="email" name="user_email" placeholder="Email Address" required>
+                    <textarea name="message" placeholder="Your Message" required></textarea>
+                    <button type="submit" class="btn-fill" id="send-btn">Send Message</button>
+                </form>
+                <p id="status-msg" style="text-align:center; margin-top:10px; font-size: 0.85rem;"></p>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+    <script src="script/script.js"></script>
+</body>
+</html>

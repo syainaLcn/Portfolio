@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bato Bato Pick</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --brand-burgundy: #1a0202;
+            --brand-maroon: #4a0000;
+            --brand-ruby: #e11d48; 
+            --brand-dark: #050101;
+            --brand-bone: #f8fafc; 
+            --brand-silver: #94a3b8;
+            --container-bg: rgba(20, 2, 2, 0.8);
+        }
+
+        body {
+            font-family: 'Arial Black', sans-serif;
+            background: radial-gradient(circle at center, var(--brand-maroon), var(--brand-dark));
+            color: var(--brand-bone);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal {
+            background: var(--brand-dark);
+            border: 2px solid var(--brand-ruby);
+            padding: 3rem;
+            text-align: center;
+            border-radius: 16px;
+            box-shadow: 0 0 30px var(--brand-ruby);
+        }
+
+        .container {
+            background: var(--container-bg);
+            border: 1px solid var(--brand-maroon);
+            padding: 2.5rem;
+            border-radius: 20px;
+            text-align: center;
+            width: 450px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 0.8rem;
+            letter-spacing: 8px;
+            color: var(--brand-ruby);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .hand-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 0 10px;
+        }
+
+        .label-tag {
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: var(--brand-ruby);
+            border: 1px solid var(--brand-ruby);
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(225, 29, 72, 0.1);
+            font-weight: bold;
+        }
+
+        .battle-arena {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0 40px;
+            min-height: 140px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .hand-icon {
+            font-size: 80px;
+            color: var(--brand-bone);
+            filter: drop-shadow(0 0 10px rgba(225, 29, 72, 0.3));
+        }
+
+        .vs-divider {
+            color: var(--brand-ruby);
+            font-size: 1.2rem;
+            font-weight: 900;
+            font-style: italic;
+            opacity: 0.5;
+        }
+
+        /* Hand Orientations */
+        #u-hand { transform: rotate(90deg) scaleX(-1); }
+        #c-hand { transform: rotate(-90deg); }
+
+        /* Shaking Animations */
+        .shake-user { animation: shakeU 0.4s ease-in-out infinite; }
+        .shake-cpu { animation: shakeC 0.4s ease-in-out infinite; }
+
+        @keyframes shakeU {
+            0%, 100% { transform: rotate(90deg) scaleX(-1); }
+            50% { transform: rotate(60deg) scaleX(-1); }
+        }
+        @keyframes shakeC {
+            0%, 100% { transform: rotate(-90deg); }
+            50% { transform: rotate(-60deg); }
+        }
+
+        #result-display {
+            font-size: 2.2rem;
+            height: 60px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-style: italic;
+        }
+
+        .win { color: #22c55e; text-shadow: 0 0 15px rgba(34, 197, 94, 0.5); }
+        .lost { color: var(--brand-ruby); text-shadow: 0 0 15px rgba(225, 29, 72, 0.5); }
+
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; }
+        .btn {
+            background: #111;
+            border: 1px solid var(--brand-maroon);
+            color: var(--brand-bone);
+            padding: 15px 0;
+            cursor: pointer;
+            flex: 1;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+        .btn:hover:not(:disabled) { 
+            background: var(--brand-ruby); 
+            transform: translateY(-2px);
+        }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .score-box span { font-size: 0.7rem; color: var(--brand-silver); display: block; margin-bottom: 5px; }
+        .score-box b { font-size: 1.5rem; color: var(--brand-ruby); }
+    </style>
+</head>
+<body>
+
+    <div id="overlay">
+        <div class="modal">
+            <h2 style="color: var(--brand-ruby); letter-spacing: 5px; margin-bottom: 20px;">BATTLE?</h2>
+            <button class="btn" style="padding: 10px 60px;" onclick="startGame()">FIGHT!</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Bato Bato Pick</h1>
+
+        <div class="hand-labels">
+            <div class="label-tag">YOU</div>
+            <div class="label-tag">COMPUTER</div>
+        </div>
+        
+        <div class="battle-arena">
+            <div id="u-hand" class="hand-icon"><i class="fa-solid fa-hand-fist"></i></div>
+            <div class="vs-divider">VS</div>
+            <div id="c-hand" class="hand-icon"><i class="fa-solid fa-hand-fist"></i></div>
+        </div>
+
+        <div id="result-display">CHOOSE</div>
+
+        <div class="controls">
+            <button class="btn" onclick="play('rock')">Bato</button>
+            <button class="btn" onclick="play('paper')">Papel</button>
+            <button class="btn" onclick="play('scissors')">Gunting</button>
+        </div>
+
+        <div class="scoreboard">
+            <div class="score-box">
+                <span>PLAYER</span>
+                <b id="u-score">0</b>
+            </div>
+            <div class="score-box">
+                <span>COMPUTER</span>
+                <b id="c-score">0</b>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uScore = 0; let cScore = 0;
+        const icons = {
+            rock: '<i class="fa-solid fa-hand-fist"></i>',
+            paper: '<i class="fa-solid fa-hand"></i>',
+            scissors: '<i class="fa-solid fa-hand-peace"></i>'
+        };
+
+        function startGame() { 
+            document.getElementById('overlay').style.opacity = '0';
+            setTimeout(() => document.getElementById('overlay').style.display = 'none', 300);
+        }
+
+        function play(userChoice) {
+            const u = document.getElementById('u-hand');
+            const c = document.getElementById('c-hand');
+            const res = document.getElementById('result-display');
+            const btns = document.querySelectorAll('.btn');
+
+            btns.forEach(b => b.disabled = true);
+            u.innerHTML = icons.rock;
+            c.innerHTML = icons.rock;
+            res.className = "";
+            
+            u.classList.add('shake-user');
+            c.classList.add('shake-cpu');
+
+            let count = 3;
+            res.innerText = "BATO...";
+
+            const timer = setInterval(() => {
+                count--;
+                if(count === 2) res.innerText = "BATO...";
+                if(count === 1) res.innerText = "PICK!";
+
+                if(count <= 0) {
+                    clearInterval(timer);
+                    u.classList.remove('shake-user');
+                    c.classList.remove('shake-cpu');
+
+                    const options = ['rock', 'paper', 'scissors'];
+                    const cpuChoice = options[Math.floor(Math.random() * 3)];
+
+                    u.innerHTML = icons[userChoice];
+                    c.innerHTML = icons[cpuChoice];
+                    
+                    if(userChoice === cpuChoice) {
+                        res.innerText = "DRAW!";
+                    } else if (
+                        (userChoice === 'rock' && cpuChoice === 'scissors') ||
+                        (userChoice === 'paper' && cpuChoice === 'rock') ||
+                        (userChoice === 'scissors' && cpuChoice === 'paper')
+                    ) {
+                        res.innerText = "VICTORY!";
+                        res.className = "win";
+                        uScore++;
+                    } else {
+                        res.innerText = "DEFEAT";
+                        res.className = "lost";
+                        cScore++;
+                    }
+
+                    document.getElementById('u-score').innerText = uScore;
+                    document.getElementById('c-score').innerText = cScore;
+                    btns.forEach(b => b.disabled = false);
+                }
+            }, 600);
+        }
+    </script>
+</body>
+</html>

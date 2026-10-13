@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PATH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        :root { --bg: #001219; --off: #005f73; --on: #94d2bd; --err: #ae2012; }
+        body { 
+            margin: 0; 
+            background: var(--bg); 
+            color: white; 
+            font-family: sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            overflow: hidden; 
+            touch-action: none;
+        }
+        
+        #ui { text-align: center; margin-bottom: 10px; }
+        #status { font-size: 2.5rem; font-weight: bold; color: var(--on); margin: 0; }
+        #best-ui { color: #ee9b00; font-size: 1rem; letter-spacing: 2px; margin-bottom: 15px; }
+
+        #timer-container {
+            width: 280px;
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.05);
+        }
+        #timer-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--err);
+            box-shadow: 0 0 10px var(--err);
+        }
+
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 90px); 
+            grid-template-rows: repeat(3, 90px); 
+            gap: 12px; 
+        }
+
+        .tile { 
+            width: 100%; 
+            height: 100%; 
+            background: var(--off); 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: 0.1s; 
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5); 
+        }
+        .tile.active { background: var(--on); box-shadow: 0 0 30px var(--on); transform: scale(0.9); }
+        .tile.wrong { background: var(--err); box-shadow: 0 0 30px var(--err); }
+
+        #msg { height: 30px; margin-top: 25px; color: #aaa; font-size: 1.1rem; text-transform: uppercase; font-weight: bold; }
+        
+        #overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,18,25,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .btn { 
+            margin-top: 25px; 
+            padding: 18px 60px; 
+            background: var(--on); 
+            border: none; 
+            color: var(--bg); 
+            cursor: pointer; 
+            font-weight: 900; 
+            font-size: 1.4rem;
+            border-radius: 8px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="overlay">
+        <h1 id="screen-title">PATH</h1>
+        <p id="screen-desc">Follow the pattern before time runs out!</p>
+        <button class="btn" onclick="startGame()">START?</button>
+    </div>
+
+    <div id="ui">
+        <p id="status">LEVEL 1</p>
+        <div id="best-ui">BEST: <span id="best">1</span></div>
+    </div>
+
+    <div id="timer-container"><div id="timer-bar"></div></div>
+
+    <div class="grid" id="grid">
+        <div class="tile" data-id="0"></div>
+        <div class="tile" data-id="1"></div>
+        <div class="tile" data-id="2"></div>
+        <div class="tile" data-id="3"></div>
+        <div class="tile" data-id="4"></div>
+        <div class="tile" data-id="5"></div>
+        <div class="tile" data-id="6"></div>
+        <div class="tile" data-id="7"></div>
+        <div class="tile" data-id="8"></div>
+    </div>
+
+    <div id="msg">READY?</div>
+
+<script>
+    let pattern = [];
+    let userPattern = [];
+    let level = 1;
+    let canClick = false;
+    let bestScore = localStorage.getItem('neon_path_best') || 1;
+    let timerInterval = null;
+    
+    const tiles = document.querySelectorAll('.tile');
+    const msg = document.getElementById('msg');
+    const status = document.getElementById('status');
+    const bestEl = document.getElementById('best');
+    const overlay = document.getElementById('overlay');
+    const timerBar = document.getElementById('timer-bar');
+
+    bestEl.innerText = bestScore;
+
+    function startGame() {
+        level = 1;
+        overlay.style.display = 'none';
+        startLevel();
+    }
+
+    function startLevel() {
+        clearInterval(timerInterval);
+        timerBar.style.transition = "none";
+        timerBar.style.width = "0%";
+        userPattern = [];
+        pattern = [];
+        canClick = false;
+        status.innerText = "LEVEL " + level;
+        msg.innerText = "WATCH...";
+        
+        for(let i=0; i < level + 2; i++) {
+            pattern.push(Math.floor(Math.random() * 9));
+        }
+        
+        setTimeout(playPattern, 600);
+    }
+
+    async function playPattern() {
+        let speed = Math.max(150, 500 - (level * 30));
+        for(let id of pattern) {
+            await wait(speed);
+            highlightTile(id);
+            await wait(speed);
+        }
+        startTimer();
+    }
+
+    function startTimer() {
+        canClick = true;
+        msg.innerText = "YOUR TURN!";
+        let duration = Math.max(1500, 5000 - (level * 250)); 
+        let start = Date.now();
+        
+        timerBar.style.transition = "width 0.1s linear";
+        
+        timerInterval = setInterval(() => {
+            let elapsed = Date.now() - start;
+            let progress = (elapsed / duration) * 100;
+            timerBar.style.width = progress + "%";
+            
+            if (progress >= 100) {
+                gameOver("TIME OUT!");
+            }
+        }, 50);
+    }
+
+    function highlightTile(id) {
+        tiles[id].classList.add('active');
+        setTimeout(() => tiles[id].classList.remove('active'), 200);
+    }
+
+    tiles.forEach(tile => {
+        tile.addEventListener('pointerdown', (e) => {
+            if(!canClick) return;
+            e.preventDefault();
+            
+            let id = parseInt(tile.getAttribute('data-id'));
+            userPattern.push(id);
+            
+            if(id === pattern[userPattern.length - 1]) {
+                highlightTile(id);
+                if(userPattern.length === pattern.length) {
+                    canClick = false;
+                    clearInterval(timerInterval);
+                    msg.innerText = "NICE!";
+                    level++;
+                    if(level > bestScore) {
+                        bestScore = level;
+                        localStorage.setItem('neon_path_best', bestScore);
+                        bestEl.innerText = bestScore;
+                    }
+                    setTimeout(startLevel, 800);
+                }
+            } else {
+                gameOver("WRONG!");
+            }
+        });
+    });
+
+    function gameOver(reason) {
+        canClick = false;
+        clearInterval(timerInterval);
+        msg.innerText = reason;
+        
+        setTimeout(() => {
+            overlay.style.display = 'flex';
+            document.getElementById('screen-title').innerText = "GAME OVER";
+            document.getElementById('screen-desc').innerText = reason + " | Level: " + level;
+            document.querySelector('.btn').innerText = "RETRY?";
+        }, 500);
+    }
+
+    function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+</script>
+</body>
+</html>

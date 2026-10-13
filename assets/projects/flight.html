@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FLIGHT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body { 
+            margin: 0; 
+            background: #011627; 
+            overflow: hidden; 
+            font-family: sans-serif; 
+            touch-action: none; 
+        }
+        canvas { display: block; }
+        #ui { 
+            position: absolute; 
+            top: 20px; 
+            width: 100%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #2EC4B6; 
+            font-weight: bold; 
+            pointer-events: none; 
+            z-index: 5;
+        }
+        #score { font-size: 3rem; text-shadow: 0 0 10px #2EC4B6; }
+        #best-ui { font-size: 1rem; color: #E71D36; letter-spacing: 2px; }
+        #overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(1, 22, 39, 0.95); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            z-index: 10; 
+            text-align: center;
+            padding: 20px;
+        }
+        h1 { font-size: 3.5rem; margin: 0; color: #2EC4B6; }
+        p { font-size: 1.1rem; opacity: 0.8; margin: 15px 0; }
+        button { 
+            background: #2EC4B6; 
+            border: none; 
+            color: #011627; 
+            padding: 18px 60px; 
+            font-size: 1.4rem; 
+            cursor: pointer; 
+            border-radius: 8px; 
+            font-weight: 900; 
+            text-transform: uppercase;
+            transition: 0.2s;
+        }
+        button:hover { background: #fff; transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <div id="score">0</div>
+        <div id="best-ui">BEST: <span id="best">0</span></div>
+    </div>
+
+    <div id="overlay">
+        <h1 id="title">FLIGHT</h1><BR>
+        <p id="desc">TAP & HOLD to fly.<br>RELEASE to fall.</p>
+        <button onclick="start()">START?</button>
+    </div>
+
+    <canvas id="game"></canvas>
+
+<script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    const bestEl = document.getElementById('best');
+    const overlay = document.getElementById('overlay');
+    const titleEl = document.getElementById('title');
+    const descEl = document.getElementById('desc');
+    const btnEl = document.querySelector('button');
+
+    let player = { x: 50, y: 300, vy: 0, w: 35, h: 25 };
+    let pipes = [];
+    let score = 0;
+    let active = false;
+    let pressing = false;
+    let bestScore = localStorage.getItem('neon_flight_best') || 0;
+    bestEl.innerText = bestScore;
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        player.x = canvas.width * 0.15;
+    }
+    window.onresize = resize;
+    resize();
+
+    const inputStart = (e) => { if(active) { e.preventDefault(); pressing = true; } };
+    const inputEnd = () => { pressing = false; };
+
+    window.addEventListener('mousedown', inputStart);
+    window.addEventListener('mouseup', inputEnd);
+    window.addEventListener('touchstart', inputStart, { passive: false });
+    window.addEventListener('touchend', inputEnd);
+
+    function start() {
+        player.y = canvas.height / 2;
+        player.vy = 0;
+        pipes = [];
+        score = 0;
+        scoreEl.innerText = "0";
+        active = true;
+        overlay.style.display = 'none';
+        requestAnimationFrame(loop);
+    }
+
+    function spawnPipe() {
+        const gap = Math.max(180, canvas.height * 0.25);
+        const minH = 60;
+        const h = Math.random() * (canvas.height - gap - (minH * 2)) + minH;
+        pipes.push({ x: canvas.width, topH: h, gap: gap, passed: false });
+    }
+
+    function loop() {
+        if(!active) return;
+        ctx.fillStyle = "#011627";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if(pressing) player.vy -= 0.8; 
+        else player.vy += 0.7; 
+        player.y += player.vy;
+        player.vy *= 0.96; 
+        ctx.shadowBlur = 15; ctx.shadowColor = "#2EC4B6";
+        ctx.fillStyle = "#2EC4B6";
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(player.x + player.w, player.y + player.h/2);
+        ctx.lineTo(player.x, player.y + player.h);
+        ctx.fill();
+        if(pipes.length === 0 || pipes[pipes.length-1].x < canvas.width - (canvas.width * 0.45)) {
+            spawnPipe();
+        }
+        for(let i = pipes.length - 1; i >= 0; i--) {
+            let p = pipes[i];
+            p.x -= (canvas.width < 600 ? 5 : 7); 
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "#FF9F1C"; 
+            ctx.fillRect(p.x, 0, 60, p.topH);
+            ctx.fillStyle = "#E71D36"; 
+            ctx.fillRect(p.x, p.topH + p.gap, 60, canvas.height);
+            if(player.x + player.w > p.x && player.x < p.x + 60) {
+                if(player.y < p.topH || player.y + player.h > p.topH + p.gap) gameOver();
+            }
+            if(!p.passed && p.x < player.x) {
+                p.passed = true;
+                score++;
+                scoreEl.innerText = score;
+            }
+            if(p.x < -100) pipes.splice(i, 1);
+        }
+        if(player.y < 0 || player.y > canvas.height) gameOver();
+        requestAnimationFrame(loop);
+    }
+
+    function gameOver() {
+        active = false;
+        if (score > bestScore) {
+            bestScore = score;
+            localStorage.setItem('neon_flight_best', bestScore);
+            bestEl.innerText = bestScore;
+        }
+        overlay.style.display = 'flex';
+        titleEl.innerText = "CRASHED!";
+        titleEl.style.color = "#E71D36";
+        descEl.innerHTML = `SCORE: ${score}<br>BEST: ${bestScore}`;
+        btnEl.innerText = "AGAIN?";
+    }
+</script>
+</body>
+</html>

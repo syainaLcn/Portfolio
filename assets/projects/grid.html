@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Master: Fixed</title>
+    <style>
+        :root {
+            --bg: #001219;
+            --tile: #005f73;
+            --tile-active: #94d2bd;
+            --highlight: #ee9b00;
+            --text: #ffffff;
+            --wrong: #ae2012;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        .header { text-align: center; margin-bottom: 20px; }
+        h1 { color: var(--highlight); letter-spacing: 4px; margin: 0; font-size: 1.8rem; }
+        
+        .stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--tile-active);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--tile);
+        }
+
+        .tile {
+            width: 80px;
+            height: 80px;
+            background-color: var(--tile);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tile.show { background-color: var(--tile-active); transform: scale(0.95); box-shadow: 0 0 15px var(--tile-active); }
+        .tile.correct { background-color: var(--tile-active); }
+        
+        .tile.error { background-color: var(--wrong); transform: shake 0.2s; }
+
+        #msg { height: 20px; margin-top: 20px; color: var(--highlight); font-weight: bold; }
+
+        #start-btn {
+            margin-top: 30px;
+            background: var(--highlight);
+            border: none;
+            color: var(--bg);
+            padding: 12px 40px;
+            font-weight: 900;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        #start-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(5px); }
+            50% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>GRID MASTER</h1>
+        <div class="stats">
+            <span>LEVEL: <b id="level">1</b></span>
+            <span>TIME: <b id="timer">10</b>s</span>
+        </div>
+    </div>
+
+    <div class="grid" id="grid">
+        <div class="tile" data-id="0"></div>
+        <div class="tile" data-id="1"></div>
+        <div class="tile" data-id="2"></div>
+        <div class="tile" data-id="3"></div>
+        <div class="tile" data-id="4"></div>
+        <div class="tile" data-id="5"></div>
+        <div class="tile" data-id="6"></div>
+        <div class="tile" data-id="7"></div>
+        <div class="tile" data-id="8"></div>
+    </div>
+
+    <div id="msg">MEMORIZE THE PATTERN!</div>
+
+    <button id="start-btn" onclick="nextLevel()">START GAME</button>
+
+    <script>
+        const tiles = document.querySelectorAll('.tile');
+        const levelDisplay = document.getElementById('level');
+        const timerDisplay = document.getElementById('timer');
+        const msgDisplay = document.getElementById('msg');
+        const startBtn = document.getElementById('start-btn');
+
+        let level = 1;
+        let pattern = [];
+        let userPattern = [];
+        let timeLeft = 10;
+        let timerInterval;
+        let canClick = false;
+
+        function nextLevel() {
+            startBtn.disabled = true;
+            userPattern = [];
+            pattern = [];
+            canClick = false;
+            msgDisplay.innerText = "WATCH closely...";
+            
+            let count = 2 + Math.floor(level / 2);
+            if (count > 6) count = 6;
+
+            while(pattern.length < count) {
+                let r = Math.floor(Math.random() * 9);
+                if(!pattern.includes(r)) pattern.push(r);
+            }
+
+            pattern.forEach((id, i) => {
+                setTimeout(() => {
+                    tiles[id].classList.add('show');
+                    setTimeout(() => tiles[id].classList.remove('show'), 600);
+                }, i * 800);
+            });
+
+            setTimeout(() => {
+                canClick = true;
+                msgDisplay.innerText = "YOUR TURN!";
+                startTimer();
+            }, pattern.length * 800);
+        }
+
+        function startTimer() {
+            timeLeft = 10;
+            timerDisplay.innerText = timeLeft;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+                if(timeLeft <= 0) gameOver("TIME'S UP!");
+            }, 1000);
+        }
+
+        tiles.forEach(tile => {
+            tile.addEventListener('click', function() {
+                if(!canClick) return;
+                let id = parseInt(this.getAttribute('data-id'));
+
+                if(pattern.includes(id)) {
+                    if(!userPattern.includes(id)) {
+                        this.classList.add('correct');
+                        userPattern.push(id);
+                        if(userPattern.length === pattern.length) {
+                            clearInterval(timerInterval);
+                            level++;
+                            levelDisplay.innerText = level;
+                            msgDisplay.innerText = "PERFECT!";
+                            setTimeout(clearBoard, 500);
+                            setTimeout(nextLevel, 1000);
+                        }
+                    }
+                } else {
+                    this.classList.add('error');
+                    gameOver("WRONG TILE!");
+                }
+            });
+        });
+
+        function clearBoard() {
+            tiles.forEach(t => t.classList.remove('correct', 'error', 'show'));
+        }
+
+        function gameOver(reason) {
+            clearInterval(timerInterval);
+            canClick = false;
+            msgDisplay.innerText = reason + " Final Level: " + level;
+            startBtn.disabled = false;
+            startBtn.innerText = "TRY AGAIN";
+            level = 1;
+            levelDisplay.innerText = level;
+            setTimeout(clearBoard, 1000);
+        }
+    </script>
+</body>
+</html>

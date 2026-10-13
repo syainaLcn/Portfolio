@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEON RHYTHM COMPACT</title>
+    <style>
+        :root { 
+            --bg: #05010a; 
+            --c1: #00f2ff; --c2: #7000ff; --c3: #ff0077; --c4: #ffbd00;
+        }
+
+        body { 
+            margin: 0; background: var(--bg); color: white; 
+            font-family: 'Arial Black', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; height: 100vh; overflow: hidden; 
+            user-select: none; touch-action: none;
+        }
+
+        #ui-top { 
+            position: absolute; top: 20px; text-align: center; z-index: 100; 
+        }
+        #score { font-size: 3rem; margin: 0; line-height: 1; }
+        #best-val-container { font-size: 0.9rem; color: var(--c1); margin-top: 5px; opacity: 0.8; }
+
+        .game-board { 
+            display: flex; 
+            width: 280px; 
+            height: 85vh; 
+            position: relative; 
+            background: rgba(255,255,255,0.02);
+            border-left: 1px solid rgba(255,255,255,0.1);
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .lane { 
+            flex: 1; position: relative; 
+            border-right: 1px solid rgba(255,255,255,0.05); 
+            display: flex; justify-content: center;
+        }
+        .lane:last-child { border-right: none; }
+
+        .note { 
+            position: absolute; width: 50px; height: 15px; 
+            border-radius: 4px; z-index: 2;
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .hit-zone {
+            position: absolute; bottom: 80px; width: 45px; height: 45px;
+            border: 2px solid rgba(255,255,255,0.1); border-radius: 8px;
+            z-index: 3; pointer-events: none;
+        }
+
+        .key-label {
+            position: absolute; bottom: 25px; font-size: 1.2rem;
+            color: rgba(255,255,255,0.2); font-weight: 900;
+        }
+
+        .light-up {
+            position: absolute; inset: 0;
+            opacity: 0; pointer-events: none; transition: opacity 0.1s;
+        }
+
+        .lane:nth-child(1) .light-up { background: linear-gradient(to top, var(--c1), transparent); }
+        .lane:nth-child(2) .light-up { background: linear-gradient(to top, var(--c2), transparent); }
+        .lane:nth-child(3) .light-up { background: linear-gradient(to top, var(--c3), transparent); }
+        .lane:nth-child(4) .light-up { background: linear-gradient(to top, var(--c4), transparent); }
+
+        .lane.active .light-up { opacity: 0.4; }
+        .lane.active .hit-zone { border-color: white; transform: scale(1.1); box-shadow: 0 0 15px white; }
+
+        #overlay { 
+            position: fixed; inset: 0; background: rgba(5,1,10,0.98); 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; z-index: 200; 
+        }
+
+        h1 { font-size: 2.5rem; margin: 0; color: white; }
+        #final-msg { margin: 10px 0 20px; font-size: 1rem; color: var(--c3); }
+
+        .btn {
+            padding: 15px 50px; font-size: 1.2rem; 
+            cursor: pointer; background: white; border: none; 
+            color: black; font-weight: 900; border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui-top">
+        <div id="score">0</div>
+        <div id="best-val-container">BEST: <span id="best-num">0</span></div>
+    </div>
+
+    <div class="game-board" id="board">
+        <div class="lane" id="l0" onpointerdown="tap(0)" onpointerup="untap(0)" onpointerleave="untap(0)">
+            <div class="light-up"></div><div class="hit-zone"></div><div class="key-label">A</div>
+        </div>
+        <div class="lane" id="l1" onpointerdown="tap(1)" onpointerup="untap(1)" onpointerleave="untap(1)">
+            <div class="light-up"></div><div class="hit-zone"></div><div class="key-label">S</div>
+        </div>
+        <div class="lane" id="l2" onpointerdown="tap(2)" onpointerup="untap(2)" onpointerleave="untap(2)">
+            <div class="light-up"></div><div class="hit-zone"></div><div class="key-label">K</div>
+        </div>
+        <div class="lane" id="l3" onpointerdown="tap(3)" onpointerup="untap(3)" onpointerleave="untap(3)">
+            <div class="light-up"></div><div class="hit-zone"></div><div class="key-label">L</div>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <h1 id="msg">READY?</h1>
+        <p id="final-msg"></p>
+        <button class="btn" onclick="start()">START</button>
+    </div>
+
+<script>
+    const colors = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)'];
+    let score = 0, notes = [], active = false, speed = 5, timer;
+    let bestScore = localStorage.getItem('neonUltraBest') || 0;
+    
+    document.getElementById('best-num').innerText = bestScore;
+
+    function start() {
+        score = 0; speed = 5.5;
+        document.getElementById('score').innerText = '0';
+        document.getElementById('overlay').style.display = 'none';
+        notes.forEach(n => n.el.remove());
+        notes = [];
+        active = true;
+        spawn();
+        loop();
+    }
+
+    function spawn() {
+        if(!active) return;
+        let l = Math.floor(Math.random() * 4);
+        let el = document.createElement('div');
+        el.className = 'note';
+        el.style.backgroundColor = colors[l];
+        el.style.color = colors[l];
+        document.getElementById('l'+l).appendChild(el);
+        notes.push({ el, l, y: -60 });
+        
+        let spawnRate = Math.max(180, 900 - (score * 7));
+        timer = setTimeout(spawn, spawnRate);
+    }
+
+    function loop() {
+        if(!active) return;
+        const boardHeight = document.getElementById('board').offsetHeight;
+        for(let i = notes.length - 1; i >= 0; i--) {
+            let n = notes[i];
+            n.y += speed;
+            n.el.style.top = n.y + 'px';
+            if(n.y > boardHeight - 20) { endGame(); return; }
+        }
+        requestAnimationFrame(loop);
+    }
+
+    function tap(i) {
+        if(!active) return;
+        document.getElementById('l'+i).classList.add('active');
+        const boardHeight = document.getElementById('board').offsetHeight;
+        const targetPos = boardHeight - 80 - 22; 
+
+        let hit = notes.findIndex(n => n.l === i && n.y > targetPos - 60 && n.y < targetPos + 40);
+        
+        if(hit > -1) {
+            notes[hit].el.remove();
+            notes.splice(hit, 1);
+            score++;
+            document.getElementById('score').innerText = score;
+            speed += 0.1; 
+            
+            if(score > bestScore) {
+                bestScore = score;
+                document.getElementById('best-num').innerText = bestScore;
+                localStorage.setItem('neonUltraBest', bestScore);
+            }
+        }
+    }
+
+    function untap(i) {
+        document.getElementById('l'+i).classList.remove('active');
+    }
+
+    window.onkeydown = (e) => {
+        const keyMap = { 'a':0, 's':1, 'k':2, 'l':3 };
+        let i = keyMap[e.key.toLowerCase()];
+        if(i !== undefined && !e.repeat) tap(i);
+    }
+    window.onkeyup = (e) => {
+        const keyMap = { 'a':0, 's':1, 'k':2, 'l':3 };
+        let i = keyMap[e.key.toLowerCase()];
+        if(i !== undefined) untap(i);
+    }
+
+    function endGame() {
+        active = false;
+        clearTimeout(timer);
+        document.getElementById('overlay').style.display = 'flex';
+        document.getElementById('msg').innerText = score >= bestScore && score > 0 ? "NEW BEST!" : "GAME OVER";
+        document.getElementById('final-msg').innerText = "SCORE: " + score;
+    }
+</script>
+</body>
+</html>
